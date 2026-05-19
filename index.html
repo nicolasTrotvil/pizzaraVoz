@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizarra</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2eb;
+    --ink: #1a1a1a;
+    --muted: #999;
+    --border: #d8d4cb;
+    --track-h: 80px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #board {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .track {
+    width: 100%;
+    height: var(--track-h);
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .track:last-child { border-bottom: 1px solid var(--border); }
+  .track:nth-child(even) { background: rgba(0,0,0,0.018); }
+
+  .track-inner {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    position: absolute;
+    left: 0;
+  }
+
+  .track-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.65rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    padding: 0 56px;
+    opacity: 0;
+    transition: opacity .6s;
+  }
+
+  .track-sep {
+    font-size: 1rem;
+    color: var(--muted);
+    padding: 0 8px;
+    opacity: 0;
+    transition: opacity .6s;
+  }
+
+  .track-text.visible,
+  .track-sep.visible { opacity: 1; }
+
+  .track-placeholder {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--border);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-left: 22px;
+    user-select: none;
+  }
+
+  .track-num {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--border);
+    letter-spacing: 0.1em;
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* fade edges */
+  .track::before,
+  .track::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 40px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .track::before { left: 0;  background: linear-gradient(to right, var(--bg), transparent); }
+  .track::after  { right: 0; background: linear-gradient(to left,  var(--bg), transparent); }
+  .track:nth-child(even)::before { background: linear-gradient(to right, #f0ede5, transparent); }
+  .track:nth-child(even)::after  { background: linear-gradient(to left,  #f0ede5, transparent); }
+
+  /* ── Panel ── */
+  #panel {
+    border-top: 2px solid var(--ink);
+    background: var(--bg);
+    padding: 14px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  #msgInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    padding: 8px 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .2s;
+    letter-spacing: 0.03em;
+  }
+  #msgInput::placeholder { color: var(--muted); font-size: 0.88rem; }
+  #msgInput:focus { border-bottom-color: var(--ink); }
+
+  #controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+  #speedRange {
+    -webkit-appearance: none;
+    width: 72px;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  #speedRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+  }
+
+  #sendBtn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity .15s;
+    flex-shrink: 0;
+  }
+  #sendBtn:hover { opacity: 0.72; }
+  #sendBtn:active { opacity: 0.45; }
+
+  #clearBtn {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    flex-shrink: 0;
+  }
+  #clearBtn:hover { color: var(--ink); border-color: var(--ink); }
+  #clearBtn:active { opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<div id="board"></div>
+
+<div id="panel">
+  <input id="msgInput" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
+  <div id="controls">
+    <span>vel</span>
+    <input type="range" id="speedRange" min="0.5" max="5" value="1.5" step="0.5">
+  </div>
+  <button id="clearBtn" onclick="clearAll()">Limpiar</button>
+  <button id="sendBtn" onclick="send()">Enviar</button>
+</div>
+
+<script>
+  const TRACK_COUNT = 5;
+  const board = document.getElementById('board');
+  const input = document.getElementById('msgInput');
+  const speedRange = document.getElementById('speedRange');
+
+  const tracks = [];
+
+  for (let i = 0; i < TRACK_COUNT; i++) {
+    const track = document.createElement('div');
+    track.className = 'track';
+
+    const num = document.createElement('div');
+    num.className = 'track-num';
+    num.textContent = String(i + 1).padStart(2, '0');
+
+    const inner = document.createElement('div');
+    inner.className = 'track-inner';
+
+    const ph = document.createElement('span');
+    ph.className = 'track-placeholder';
+    ph.textContent = '—';
+    inner.appendChild(ph);
+
+    track.appendChild(inner);
+    track.appendChild(num);
+    board.appendChild(track);
+    tracks.push({ el: track, inner, ph, anim: null });
+  }
+
+  let nextTrack = 0;
+
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+  function send() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    const t = tracks[nextTrack % TRACK_COUNT];
+    nextTrack++;
+    startMarquee(t, text);
+  }
+
+  function clearAll() {
+    tracks.forEach(t => {
+      if (t.anim) { cancelAnimationFrame(t.anim); t.anim = null; }
+      t.inner.innerHTML = '';
+      t.inner.style.transform = '';
+      const ph = document.createElement('span');
+      ph.className = 'track-placeholder';
+      ph.textContent = '—';
+      t.inner.appendChild(ph);
+      t.ph = ph;
+    });
+    nextTrack = 0;
+  }
+
+  function startMarquee(t, text) {
+    if (t.anim) { cancelAnimationFrame(t.anim); t.anim = null; }
+
+    t.ph.style.display = 'none';
+    t.inner.innerHTML = '';
+
+    // Build 5 copies for seamless loop
+    for (let i = 0; i < 5; i++) {
+      const span = document.createElement('span');
+      span.className = 'track-text';
+      span.textContent = text;
+      const sep = document.createElement('span');
+      sep.className = 'track-sep';
+      sep.textContent = '·';
+      t.inner.appendChild(span);
+      t.inner.appendChild(sep);
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        t.inner.querySelectorAll('.track-text, .track-sep').forEach(el => el.classList.add('visible'));
+
+        const unitW = t.inner.children[0].offsetWidth + t.inner.children[1].offsetWidth;
+        if (unitW === 0) return;
+
+        let x = 0;
+        let last = null;
+
+        function tick(ts) {
+          if (!last) last = ts;
+          const dt = Math.min(ts - last, 50); // cap delta to avoid jumps
+          last = ts;
+
+          const pxPerSec = parseFloat(speedRange.value) * 55;
+          x -= (pxPerSec * dt) / 1000;
+          if (x <= -unitW) x += unitW;
+
+          t.inner.style.transform = `translateX(${x}px)`;
+          t.anim = requestAnimationFrame(tick);
+        }
+
+        t.anim = requestAnimationFrame(tick);
+      });
+    });
+  }
+</script>
+</body>
+</html>
