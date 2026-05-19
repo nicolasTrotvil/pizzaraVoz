@@ -34,6 +34,62 @@
     margin: 0 auto;
   }
 
+  /* ── Topbar ── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 8px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+
+  #modeToggle {
+    display: flex;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .mode-btn {
+    background: transparent;
+    border: none;
+    padding: 7px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-btn:first-child { border-right: 1.5px solid var(--border); }
+  .mode-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  #historyToggle {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    padding: 7px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  #historyToggle.has-items { color: var(--ink); border-color: var(--ink); }
+
+  /* ── Board ── */
   #board {
     flex: 1;
     display: flex;
@@ -41,8 +97,10 @@
     justify-content: center;
     overflow: hidden;
     min-height: 0;
+    position: relative;
   }
 
+  /* Normal mode tracks */
   .track {
     width: 100%;
     height: var(--track-h);
@@ -111,8 +169,7 @@
     user-select: none;
   }
 
-  .track::before,
-  .track::after {
+  .track::before, .track::after {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
@@ -125,7 +182,156 @@
   .track:nth-child(even)::before { background: linear-gradient(to right, #f0ede5, transparent); }
   .track:nth-child(even)::after  { background: linear-gradient(to left,  #f0ede5, transparent); }
 
-  /* Panel reorganizado para móvil */
+  /* Entrenamiento mode */
+  #board.big {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+
+  #big-inner {
+    display: none;
+    align-items: center;
+    white-space: nowrap;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  #board.big #big-inner { display: flex; }
+
+  #big-inner .track-text {
+    font-size: clamp(2.8rem, 10vw, 4.5rem);
+    padding: 0 64px;
+  }
+
+  #big-inner .track-sep { font-size: 2rem; padding: 0 12px; }
+
+  #big-placeholder {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--border);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-left: 28px;
+    user-select: none;
+  }
+
+  #board.big::before,
+  #board.big::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 40px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  #board.big::before { left: 0;  background: linear-gradient(to right, var(--bg), transparent); }
+  #board.big::after  { right: 0; background: linear-gradient(to left,  var(--bg), transparent); }
+
+  /* ── Historial overlay ── */
+  #historyPanel {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg);
+    flex-direction: column;
+    z-index: 10;
+  }
+  #historyPanel.open { display: flex; }
+
+  #historyHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1.5px solid var(--ink);
+    flex-shrink: 0;
+  }
+
+  #historyHeader span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  #clearHistoryBtn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    padding: 5px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #clearHistoryBtn:active { opacity: 0.5; }
+
+  #historyList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .1s;
+  }
+  .history-item:active { background: rgba(0,0,0,0.04); }
+
+  .history-item-text {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--ink);
+    letter-spacing: 0.03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .history-item-arrow {
+    font-size: 0.75rem;
+    color: var(--border);
+    flex-shrink: 0;
+  }
+
+  #historyEmpty {
+    padding: 32px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--border);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  #closeHistory {
+    background: transparent;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 5px 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Panel ── */
   #panel {
     border-top: 2px solid var(--ink);
     background: var(--bg);
@@ -137,14 +343,8 @@
     flex-shrink: 0;
   }
 
-  #input-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
   #msgInput {
-    flex: 1;
+    width: 100%;
     background: transparent;
     border: none;
     border-bottom: 1.5px solid var(--border);
@@ -155,7 +355,6 @@
     outline: none;
     transition: border-color .2s;
     letter-spacing: 0.03em;
-    min-width: 0;
   }
   #msgInput::placeholder { color: var(--muted); font-size: 0.88rem; }
   #msgInput:focus { border-bottom-color: var(--ink); }
@@ -192,10 +391,7 @@
     cursor: pointer;
   }
 
-  #action-btns {
-    display: flex;
-    gap: 8px;
-  }
+  #action-btns { display: flex; gap: 8px; }
 
   #sendBtn {
     background: var(--ink);
@@ -224,7 +420,6 @@
     letter-spacing: 0.09em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: color .15s, border-color .15s;
     -webkit-tap-highlight-color: transparent;
   }
   #clearBtn:active { opacity: 0.5; }
@@ -233,12 +428,44 @@
 <body>
 
 <div id="app">
-  <div id="board"></div>
 
-  <div id="panel">
-    <div id="input-row">
-      <input id="msgInput" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
+  <!-- Topbar -->
+  <div id="topbar">
+    <div id="modeToggle">
+      <button class="mode-btn active" id="btnNormal" onclick="setMode('normal')">Normal</button>
+      <button class="mode-btn" id="btnBig" onclick="setMode('big')">Entreno</button>
     </div>
+    <button id="historyToggle" onclick="openHistory()">Historial</button>
+  </div>
+
+  <!-- Board -->
+  <div id="board">
+
+    <!-- Tracks (modo normal) -->
+    <div id="tracks"></div>
+
+    <!-- Track grande (modo entrenamiento) -->
+    <div id="big-inner">
+      <span id="big-placeholder">—</span>
+    </div>
+
+    <!-- Historial overlay -->
+    <div id="historyPanel">
+      <div id="historyHeader">
+        <span>Historial</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="clearHistoryBtn" onclick="clearHistory()">Borrar todo</button>
+          <button id="closeHistory" onclick="closeHistory()">Cerrar</button>
+        </div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+  </div>
+
+  <!-- Panel -->
+  <div id="panel">
+    <input id="msgInput" type="text" placeholder="Escribí tu mensaje…" autocomplete="off" />
     <div id="btn-row">
       <div id="controls">
         <span>vel</span>
@@ -250,16 +477,27 @@
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
   const TRACK_COUNT = 5;
+  const tracksEl = document.getElementById('tracks');
+  const bigInner = document.getElementById('big-inner');
   const board = document.getElementById('board');
   const input = document.getElementById('msgInput');
   const speedRange = document.getElementById('speedRange');
+  const historyPanel = document.getElementById('historyPanel');
+  const historyList = document.getElementById('historyList');
+  const historyToggle = document.getElementById('historyToggle');
 
+  let mode = 'normal';
+  let history = [];
+  let nextTrack = 0;
+  let bigAnim = null;
+
+  // ── Build normal tracks ──
   const tracks = [];
-
   for (let i = 0; i < TRACK_COUNT; i++) {
     const track = document.createElement('div');
     track.className = 'track';
@@ -278,42 +516,65 @@
 
     track.appendChild(inner);
     track.appendChild(num);
-    board.appendChild(track);
+    tracksEl.appendChild(track);
     tracks.push({ el: track, inner, ph, anim: null });
   }
 
-  let nextTrack = 0;
-
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
+  // ── Mode toggle ──
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btnNormal').classList.toggle('active', m === 'normal');
+    document.getElementById('btnBig').classList.toggle('active', m === 'big');
+    board.classList.toggle('big', m === 'big');
+    tracksEl.style.display = m === 'normal' ? 'block' : 'none';
+    clearAll();
+  }
+
+  // ── Send ──
   function send() {
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
-    const t = tracks[nextTrack % TRACK_COUNT];
-    nextTrack++;
-    startMarquee(t, text);
+    addToHistory(text);
+    if (mode === 'normal') {
+      const t = tracks[nextTrack % TRACK_COUNT];
+      nextTrack++;
+      startMarquee(t.inner, text, false);
+    } else {
+      startMarquee(bigInner, text, true);
+    }
   }
 
+  // ── Clear ──
   function clearAll() {
-    tracks.forEach(t => {
-      if (t.anim) { cancelAnimationFrame(t.anim); t.anim = null; }
-      t.inner.innerHTML = '';
-      t.inner.style.transform = 'translateY(-50%)';
-      const ph = document.createElement('span');
-      ph.className = 'track-placeholder';
-      ph.textContent = '—';
-      t.inner.appendChild(ph);
-      t.ph = ph;
-    });
-    nextTrack = 0;
+    if (mode === 'normal') {
+      tracks.forEach(t => {
+        if (t.anim) { cancelAnimationFrame(t.anim); t.anim = null; }
+        resetInner(t.inner, false);
+      });
+      nextTrack = 0;
+    } else {
+      if (bigAnim) { cancelAnimationFrame(bigAnim); bigAnim = null; }
+      resetInner(bigInner, true);
+    }
   }
 
-  function startMarquee(t, text) {
-    if (t.anim) { cancelAnimationFrame(t.anim); t.anim = null; }
+  function resetInner(inner, isBig) {
+    inner.innerHTML = '';
+    inner.style.transform = 'translateY(-50%)';
+    const ph = document.createElement('span');
+    ph.className = isBig ? '' : 'track-placeholder';
+    if (isBig) { ph.id = 'big-placeholder'; }
+    ph.textContent = '—';
+    if (isBig) { ph.style.cssText = 'font-family:"DM Mono",monospace;font-size:.75rem;color:var(--border);letter-spacing:.14em;text-transform:uppercase;padding-left:28px;user-select:none;'; }
+    inner.appendChild(ph);
+  }
 
-    t.ph.style.display = 'none';
-    t.inner.innerHTML = '';
+  // ── Marquee ──
+  function startMarquee(inner, text, isBig) {
+    inner.innerHTML = '';
 
     for (let i = 0; i < 5; i++) {
       const span = document.createElement('span');
@@ -322,17 +583,17 @@
       const sep = document.createElement('span');
       sep.className = 'track-sep';
       sep.textContent = '·';
-      t.inner.appendChild(span);
-      t.inner.appendChild(sep);
+      inner.appendChild(span);
+      inner.appendChild(sep);
     }
 
-    t.inner.style.transform = 'translateY(-50%)';
+    inner.style.transform = 'translateY(-50%)';
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        t.inner.querySelectorAll('.track-text, .track-sep').forEach(el => el.classList.add('visible'));
+        inner.querySelectorAll('.track-text, .track-sep').forEach(el => el.classList.add('visible'));
 
-        const unitW = t.inner.children[0].offsetWidth + t.inner.children[1].offsetWidth;
+        const unitW = inner.children[0].offsetWidth + inner.children[1].offsetWidth;
         if (unitW === 0) return;
 
         let x = 0;
@@ -347,14 +608,80 @@
           x -= (pxPerSec * dt) / 1000;
           if (x <= -unitW) x += unitW;
 
-          t.inner.style.transform = `translateX(${x}px) translateY(-50%)`;
-          t.anim = requestAnimationFrame(tick);
+          inner.style.transform = `translateX(${x}px) translateY(-50%)`;
+
+          if (isBig) {
+            bigAnim = requestAnimationFrame(tick);
+          } else {
+            // find track and store anim
+            const t = tracks.find(t => t.inner === inner);
+            if (t) t.anim = requestAnimationFrame(tick);
+          }
         }
 
-        t.anim = requestAnimationFrame(tick);
+        if (isBig) {
+          bigAnim = requestAnimationFrame(tick);
+        } else {
+          const t = tracks.find(t => t.inner === inner);
+          if (t) t.anim = requestAnimationFrame(tick);
+        }
       });
     });
   }
+
+  // ── History ──
+  function addToHistory(text) {
+    if (history.includes(text)) {
+      history = history.filter(h => h !== text);
+    }
+    history.unshift(text);
+    historyToggle.classList.add('has-items');
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    if (history.length === 0) {
+      const empty = document.createElement('div');
+      empty.id = 'historyEmpty';
+      empty.textContent = 'Sin mensajes aún';
+      historyList.appendChild(empty);
+      historyToggle.classList.remove('has-items');
+      return;
+    }
+    history.forEach(text => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <span class="history-item-text">${text}</span>
+        <span class="history-item-arrow">▶</span>
+      `;
+      item.addEventListener('click', () => {
+        closeHistory();
+        input.value = text;
+        send();
+      });
+      historyList.appendChild(item);
+    });
+  }
+
+  function openHistory() {
+    renderHistory();
+    historyPanel.classList.add('open');
+  }
+
+  function closeHistory() {
+    historyPanel.classList.remove('open');
+  }
+
+  function clearHistory() {
+    history = [];
+    renderHistory();
+    historyToggle.classList.remove('has-items');
+  }
+
+  // Init
+  setMode('normal');
 </script>
 </body>
 </html>
